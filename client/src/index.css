@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-white/10;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-background text-white font-inter antialiased;
+    font-feature-settings: 'rlig' 1, 'calt' 1;
+  }
+  ::-webkit-scrollbar {
+    @apply w-1.5 h-1.5;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-white/10 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-white/20;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-bg-card/80 backdrop-blur-xl border border-white/[0.08];
+  }
+  .glass-hover {
+    @apply hover:bg-white/[0.05] hover:border-white/[0.15] transition-all duration-300;
+  }
+  .gradient-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-400 to-secondary;
+  }
+  .glow-primary {
+    box-shadow: 0 0 32px rgba(139, 92, 246, 0.35);
+  }
+  .glow-secondary {
+    box-shadow: 0 0 32px rgba(34, 211, 238, 0.35);
+  }
+}
+
+.bg-grid-pattern {
+  background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
