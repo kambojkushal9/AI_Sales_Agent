@@ -44,7 +44,7 @@ export const DashboardLayout: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background text-white flex relative">
+    <div className="min-h-screen bg-background text-white flex relative overflow-x-hidden">
       <AnimatedBackground variant="dashboard" />
 
       {/* Desktop Sidebar */}
@@ -221,13 +221,11 @@ export const DashboardLayout: React.FC = () => {
           </div>
         </header>
 
-        {/* Page Content with smooth route transitions */}
-        <main className="flex-1 p-4 lg:p-8 overflow-y-auto">
-          <AnimatePresence mode="wait">
-            <PageTransition key={location.pathname}>
-              <Outlet />
-            </PageTransition>
-          </AnimatePresence>
+        {/* Page Content with smooth route entrance */}
+        <main className="flex-1 p-4 lg:p-8 overflow-y-auto overflow-x-hidden">
+          <PageTransition key={location.pathname}>
+            <Outlet />
+          </PageTransition>
         </main>
       </div>
     </div>

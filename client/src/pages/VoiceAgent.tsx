@@ -512,7 +512,9 @@ export const VoiceAgent: React.FC = () => {
             ref={canvasRef}
             width={280}
             height={36}
-            className="mt-3 rounded-lg opacity-80"
+            className={`mt-3 rounded-lg w-full max-w-[280px] transition-opacity duration-300 ${
+              callActive ? 'h-9 opacity-85' : 'h-2 opacity-0'
+            }`}
           />
         </div>
 
@@ -649,6 +651,12 @@ export const VoiceAgent: React.FC = () => {
             <div className="p-3 rounded-xl bg-white/[0.025] border border-white/[0.06] text-center">
               <p className="text-[10px] uppercase tracking-wider text-gray-400">Lead Score</p>
               <p className="font-space text-lg font-bold text-secondary mt-0.5 tabular-nums">{leadScore}/100</p>
+              <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden mt-1.5">
+                <div
+                  className="h-full bg-gradient-to-r from-primary to-secondary transition-all duration-500"
+                  style={{ width: `${Math.min(100, Math.max(0, leadScore))}%` }}
+                />
+              </div>
             </div>
           </div>
         </Card>
@@ -679,18 +687,34 @@ export const VoiceAgent: React.FC = () => {
         </AnimatePresence>
 
         {/* Live Transcript + Text Input */}
-        <Card className="flex-1 flex flex-col min-h-[300px] max-h-[400px]">
+        <Card className="flex-1 flex flex-col min-h-[300px] max-h-[420px]">
           <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
             <h3 className="text-sm font-space font-semibold text-white">Live Transcript</h3>
-            <span className="text-[11px] text-gray-400">{messages.length} turns</span>
+            <span className="text-[11px] text-gray-400 tabular-nums">{messages.length} turns</span>
           </div>
 
-          <div className="flex-1 overflow-y-auto py-3 space-y-3 pr-1">
+          <div className="flex-1 min-h-0 overflow-y-auto py-3 space-y-3 pr-1">
             {messages.length === 0 && (
-              <div className="text-center py-10 px-4">
+              <div className="text-center py-6 px-3 space-y-3">
                 <p className="text-xs text-gray-400">
-                  Click <span className="text-emerald-400 font-medium">Start AI Call</span> or type a message below to begin a live voice sales session.
+                  Click <span className="text-emerald-400 font-medium">Start AI Call</span> or try a quick prompt:
                 </p>
+                <div className="flex flex-wrap justify-center gap-1.5">
+                  {[
+                    'What pricing plans do you offer?',
+                    'We have 25 reps and want to book a demo',
+                    'Hindi: क्या आप हिंदी में बात कर सकते हैं?',
+                  ].map((prompt) => (
+                    <button
+                      key={prompt}
+                      type="button"
+                      onClick={() => handleSendMessage(prompt)}
+                      className="text-[11px] px-2.5 py-1.5 rounded-lg bg-white/[0.04] hover:bg-primary/20 border border-white/[0.08] hover:border-primary/40 text-gray-300 hover:text-white transition-all text-left"
+                    >
+                      {prompt}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
             {messages.map((m, idx) => (

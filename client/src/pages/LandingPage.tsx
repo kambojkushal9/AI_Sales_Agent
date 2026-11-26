@@ -95,7 +95,7 @@ export const LandingPage: React.FC = () => {
 
       {/* Top Navigation */}
       <header className="sticky top-0 z-30 border-b border-white/[0.06] bg-background/70 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-6 h-18 py-4 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2.5 group">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary via-indigo to-secondary flex items-center justify-center shadow-lg shadow-primary/25 group-hover:scale-105 transition-transform">
               <Sparkles className="w-4 h-4 text-white" />
@@ -222,18 +222,18 @@ export const LandingPage: React.FC = () => {
                 <p className="text-xs font-semibold uppercase tracking-wider text-secondary">
                   {orbState}
                 </p>
-                <p className="text-xs text-gray-400 mt-1 h-4">
+                <p className="text-xs text-gray-400 mt-1 min-h-[2rem] flex items-center justify-center">
                   {orbStateDescriptions[orbState]}
                 </p>
               </div>
 
               {/* Interactive State Selector */}
-              <div className="mt-6 flex flex-wrap justify-center gap-1.5 p-1.5 rounded-2xl bg-black/30 border border-white/[0.06] w-full">
+              <div className="mt-5 grid grid-cols-5 gap-1 p-1.5 rounded-2xl bg-black/30 border border-white/[0.06] w-full">
                 {(['idle', 'listening', 'thinking', 'speaking', 'completed'] as OrbState[]).map((st) => (
                   <button
                     key={st}
                     onClick={() => setOrbState(st)}
-                    className={`flex-1 min-w-[60px] px-2.5 py-1.5 rounded-xl text-[11px] font-medium capitalize transition-all ${
+                    className={`px-1.5 py-1.5 rounded-xl text-[10px] sm:text-[11px] font-medium capitalize transition-all truncate ${
                       orbState === st
                         ? 'bg-primary text-white shadow-md shadow-primary/30'
                         : 'text-gray-400 hover:text-white hover:bg-white/[0.04]'

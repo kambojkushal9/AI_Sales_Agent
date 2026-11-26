@@ -43,6 +43,13 @@ export const Analytics: React.FC = () => {
     }
   };
 
+  const rangeMultiplier = range === '7d' ? 1 : range === '30d' ? 3.8 : 11.2;
+  const activityData = demoCallActivity.map((d) => ({
+    ...d,
+    calls: Math.round(d.calls * rangeMultiplier),
+    qualified: Math.round(d.qualified * rangeMultiplier),
+  }));
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -100,7 +107,7 @@ export const Analytics: React.FC = () => {
           <h3 className="font-space font-semibold mb-4">Calls Over Time</h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={demoCallActivity}>
+              <AreaChart data={activityData}>
                 <defs>
                   <linearGradient id="analyticsArea" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.45} />
@@ -118,30 +125,32 @@ export const Analytics: React.FC = () => {
 
         <Card>
           <h3 className="font-space font-semibold mb-4">Sentiment Distribution</h3>
-          <div className="h-64 flex items-center">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={demoSentimentData}
-                  dataKey="value"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={55}
-                  outerRadius={85}
-                  paddingAngle={4}
-                >
-                  {demoSentimentData.map((entry, idx) => (
-                    <Cell key={idx} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip contentStyle={{ backgroundColor: '#0B0F1A', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }} />
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="space-y-2 pr-4">
+          <div className="flex flex-col sm:flex-row items-center gap-4 sm:h-64">
+            <div className="w-full h-52 sm:h-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={demoSentimentData}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={52}
+                    outerRadius={82}
+                    paddingAngle={4}
+                  >
+                    {demoSentimentData.map((entry, idx) => (
+                      <Cell key={idx} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip contentStyle={{ backgroundColor: '#0B0F1A', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="flex flex-wrap sm:flex-col gap-3 sm:gap-2 sm:pr-4 justify-center shrink-0">
               {demoSentimentData.map((s) => (
                 <div key={s.name} className="flex items-center gap-2 text-xs">
-                  <span className="w-3 h-3 rounded-full" style={{ backgroundColor: s.color }} />
+                  <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: s.color }} />
                   <span className="text-gray-300">{s.name}: {s.value}%</span>
                 </div>
               ))}

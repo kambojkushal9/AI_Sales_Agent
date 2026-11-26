@@ -396,12 +396,12 @@ export const Leads: React.FC = () => {
               onChange={(e) => setForm({ ...form, status: e.target.value })}
               className="w-full bg-bg-secondary border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white"
             >
-              <option value="new">New</option>
-              <option value="contacted">Contacted</option>
-              <option value="qualified">Qualified</option>
-              <option value="proposal">Proposal</option>
-              <option value="converted">Converted</option>
-              <option value="lost">Lost</option>
+              <option value="new" className="bg-bg-card text-white">New</option>
+              <option value="contacted" className="bg-bg-card text-white">Contacted</option>
+              <option value="qualified" className="bg-bg-card text-white">Qualified</option>
+              <option value="proposal" className="bg-bg-card text-white">Proposal</option>
+              <option value="converted" className="bg-bg-card text-white">Converted</option>
+              <option value="lost" className="bg-bg-card text-white">Lost</option>
             </select>
           </div>
           <div>

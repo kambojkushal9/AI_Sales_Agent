@@ -128,9 +128,9 @@ export const Settings: React.FC = () => {
                 onChange={(e) => setForm({ ...form, language: e.target.value })}
                 className="w-full bg-bg-secondary border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white"
               >
-                <option value="en">English</option>
-                <option value="hi">Hindi</option>
-                <option value="hi-en">Hinglish</option>
+                <option value="en" className="bg-bg-card text-white">English</option>
+                <option value="hi" className="bg-bg-card text-white">Hindi</option>
+                <option value="hi-en" className="bg-bg-card text-white">Hinglish</option>
               </select>
             </div>
 
