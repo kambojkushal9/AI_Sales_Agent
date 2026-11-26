@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Phone, Sparkles, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { Card, Badge, Button, Modal } from '../components/ui';
+import { Card, Badge, Button, Modal, EmptyState } from '../components/ui';
 import { callsAPI } from '../lib/api';
 import { demoCalls } from '../lib/demoData';
 import { Call } from '../types';
@@ -42,48 +42,56 @@ export const CallHistory: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-7xl mx-auto">
       <div>
-        <h2 className="font-space text-2xl font-bold">Call History & Transcripts</h2>
+        <h2 className="font-space text-2xl font-bold tracking-tight">Call History & Transcripts</h2>
         <p className="text-sm text-gray-400">Review recorded conversations, sentiment, and Gemini summaries.</p>
       </div>
 
       {/* Calls List */}
-      <div className="space-y-3">
-        {calls.map((call) => (
-          <Card
-            key={call._id}
-            hover
-            onClick={() => setSelectedCall(call)}
-            className="cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-          >
-            <div className="flex items-center gap-4">
-              <div className="w-11 h-11 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center text-primary shrink-0">
-                <Phone className="w-5 h-5" />
+      {calls.length === 0 ? (
+        <EmptyState
+          icon={Phone}
+          title="No calls recorded yet"
+          description="Start a live session in the AI Voice Agent studio to see transcripts and summaries here."
+        />
+      ) : (
+        <div className="space-y-3">
+          {calls.map((call) => (
+            <Card
+              key={call._id}
+              hover
+              onClick={() => setSelectedCall(call)}
+              className="cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-11 h-11 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center text-primary shrink-0">
+                  <Phone className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-space font-semibold text-base text-white">{call.customerName}</h3>
+                  <p className="text-xs text-gray-400">
+                    {call.customerPhone || 'Web Voice Session'} • {formatTimeAgo(call.createdAt)}
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-space font-semibold text-base">{call.customerName}</h3>
-                <p className="text-xs text-gray-400">
-                  {call.customerPhone || 'Web Voice Session'} • {formatTimeAgo(call.createdAt)}
-                </p>
-              </div>
-            </div>
 
-            <div className="flex flex-wrap items-center gap-3">
-              <span className="flex items-center gap-1 text-xs text-gray-300">
-                <Clock className="w-3.5 h-3.5 text-gray-400" /> {formatDuration(call.duration)}
-              </span>
-              <span className="text-sm">{getSentimentEmoji(call.sentiment)}</span>
-              <Badge variant={call.leadScore >= 75 ? 'success' : 'primary'}>
-                Score {call.leadScore}
-              </Badge>
-              <Badge variant={call.status === 'completed' ? 'success' : 'default'}>
-                {call.status}
-              </Badge>
-            </div>
-          </Card>
-        ))}
-      </div>
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="flex items-center gap-1 text-xs text-gray-300 tabular-nums">
+                  <Clock className="w-3.5 h-3.5 text-gray-400" /> {formatDuration(call.duration)}
+                </span>
+                <span className="text-sm">{getSentimentEmoji(call.sentiment)}</span>
+                <Badge variant={call.leadScore >= 75 ? 'success' : 'primary'}>
+                  Score {call.leadScore}
+                </Badge>
+                <Badge variant={call.status === 'completed' ? 'success' : 'default'}>
+                  {call.status}
+                </Badge>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
 
       {/* Call Detail Modal */}
       <Modal

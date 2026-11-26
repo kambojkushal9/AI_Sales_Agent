@@ -16,7 +16,7 @@ export const Card: React.FC<CardProps> = ({
   return (
     <div
       className={cn(
-        'glass rounded-2xl p-5',
+        'glass rounded-2xl p-5 relative',
         hover && 'glass-hover',
         glow && 'glow-primary',
         className

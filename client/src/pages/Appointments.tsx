@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Calendar as CalendarIcon, Clock, Plus, CheckCircle2, XCircle, Sparkles } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { Card, Button, Badge, Input, Modal } from '../components/ui';
+import { Card, Button, Badge, Input, Modal, EmptyState } from '../components/ui';
 import { appointmentsAPI } from '../lib/api';
 import { demoAppointments } from '../lib/demoData';
 import { Appointment } from '../types';
@@ -70,10 +70,10 @@ export const Appointments: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-7xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="font-space text-2xl font-bold">Appointments</h2>
+          <h2 className="font-space text-2xl font-bold tracking-tight">Appointments</h2>
           <p className="text-sm text-gray-400">Internal application calendar synced with AI agent bookings.</p>
         </div>
         <Button onClick={() => setModalOpen(true)}>
@@ -93,7 +93,7 @@ export const Appointments: React.FC = () => {
             type="date"
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
-            className="bg-bg-secondary border border-white/10 rounded-xl px-3 py-1.5 text-sm text-white"
+            className="bg-bg-secondary border border-white/10 rounded-xl px-3 py-1.5 text-sm text-white focus:outline-none focus:border-secondary/60"
           />
         </div>
 
@@ -110,11 +110,11 @@ export const Appointments: React.FC = () => {
                 }}
                 className={`p-3 rounded-xl text-sm font-medium border transition-all ${
                   isBooked
-                    ? 'bg-primary/20 border-primary/40 text-purple-300 cursor-not-allowed'
-                    : 'bg-white/[0.03] border-white/10 text-gray-200 hover:border-secondary/60 hover:bg-secondary/10'
+                    ? 'bg-primary/15 border-primary/35 text-purple-300 cursor-not-allowed opacity-75'
+                    : 'bg-white/[0.025] border-white/10 text-gray-200 hover:border-secondary/60 hover:bg-secondary/10'
                 }`}
               >
-                {slot}
+                <span className="tabular-nums">{slot}</span>
                 <span className="block text-[10px] mt-0.5 opacity-75">
                   {isBooked ? 'Booked' : 'Available'}
                 </span>
@@ -125,58 +125,67 @@ export const Appointments: React.FC = () => {
       </Card>
 
       {/* Upcoming Appointments */}
-      <div className="grid md:grid-cols-2 gap-4">
-        {appointments.map((apt) => (
-          <Card key={apt._id} hover className="space-y-3">
-            <div className="flex items-start justify-between gap-2">
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="font-space font-semibold text-base">{apt.title}</h3>
-                  {apt.createdByAgent && (
-                    <Badge variant="secondary">
-                      <Sparkles className="w-3 h-3" /> AI Booked
-                    </Badge>
-                  )}
+      {appointments.length === 0 ? (
+        <EmptyState
+          icon={CalendarIcon}
+          title="No appointments scheduled"
+          description="Select an available time slot above or click New Appointment to schedule a demo."
+          action={<Button onClick={() => setModalOpen(true)}>Schedule Demo</Button>}
+        />
+      ) : (
+        <div className="grid md:grid-cols-2 gap-4">
+          {appointments.map((apt) => (
+            <Card key={apt._id} hover className="space-y-3">
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="font-space font-semibold text-base">{apt.title}</h3>
+                    {apt.createdByAgent && (
+                      <Badge variant="secondary">
+                        <Sparkles className="w-3 h-3" /> AI Booked
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-400 mt-0.5">{apt.customerName} • {apt.customerEmail || apt.customerPhone}</p>
                 </div>
-                <p className="text-sm text-gray-400 mt-0.5">{apt.customerName} • {apt.customerEmail || apt.customerPhone}</p>
+                <Badge
+                  variant={
+                    apt.status === 'confirmed'
+                      ? 'success'
+                      : apt.status === 'cancelled'
+                      ? 'error'
+                      : 'warning'
+                  }
+                >
+                  {apt.status}
+                </Badge>
               </div>
-              <Badge
-                variant={
-                  apt.status === 'confirmed'
-                    ? 'success'
-                    : apt.status === 'cancelled'
-                    ? 'error'
-                    : 'warning'
-                }
-              >
-                {apt.status}
-              </Badge>
-            </div>
 
-            <div className="flex items-center gap-4 text-xs text-gray-300">
-              <span className="flex items-center gap-1.5">
-                <CalendarIcon className="w-3.5 h-3.5 text-primary" /> {formatDate(apt.date)}
-              </span>
-              <span className="flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-secondary" /> {apt.startTime} - {apt.endTime} ({apt.duration}m)
-              </span>
-            </div>
+              <div className="flex items-center gap-4 text-xs text-gray-300">
+                <span className="flex items-center gap-1.5">
+                  <CalendarIcon className="w-3.5 h-3.5 text-primary" /> {formatDate(apt.date)}
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-secondary" /> {apt.startTime} - {apt.endTime} ({apt.duration}m)
+                </span>
+              </div>
 
-            {apt.status !== 'cancelled' && (
-              <div className="flex gap-2 pt-2 border-t border-white/10">
-                {apt.status !== 'confirmed' && (
-                  <Button size="sm" variant="secondary" onClick={() => handleStatusChange(apt._id, 'confirmed')}>
-                    <CheckCircle2 className="w-3.5 h-3.5 text-success" /> Confirm
+              {apt.status !== 'cancelled' && (
+                <div className="flex gap-2 pt-2 border-t border-white/[0.08]">
+                  {apt.status !== 'confirmed' && (
+                    <Button size="sm" variant="secondary" onClick={() => handleStatusChange(apt._id, 'confirmed')}>
+                      <CheckCircle2 className="w-3.5 h-3.5 text-success" /> Confirm
+                    </Button>
+                  )}
+                  <Button size="sm" variant="ghost" onClick={() => handleStatusChange(apt._id, 'cancelled')}>
+                    <XCircle className="w-3.5 h-3.5 text-error" /> Cancel
                   </Button>
-                )}
-                <Button size="sm" variant="ghost" onClick={() => handleStatusChange(apt._id, 'cancelled')}>
-                  <XCircle className="w-3.5 h-3.5 text-error" /> Cancel
-                </Button>
-              </div>
-            )}
-          </Card>
-        ))}
-      </div>
+                </div>
+              )}
+            </Card>
+          ))}
+        </div>
+      )}
 
       {/* New Appointment Modal */}
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title="Schedule Appointment">

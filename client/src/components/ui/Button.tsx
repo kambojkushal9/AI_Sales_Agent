@@ -19,10 +19,12 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const variants = {
-    primary: 'bg-gradient-to-r from-primary to-purple-600 hover:from-purple-500 hover:to-primary text-white shadow-lg shadow-primary/25',
-    secondary: 'bg-white/5 hover:bg-white/10 text-white border border-white/10',
-    ghost: 'bg-transparent hover:bg-white/5 text-gray-300 hover:text-white',
-    danger: 'bg-error/90 hover:bg-error text-white shadow-lg shadow-error/20',
+    primary:
+      'bg-gradient-to-r from-primary via-indigo to-purple-600 hover:brightness-110 text-white shadow-lg shadow-primary/25 border border-white/10',
+    secondary:
+      'bg-white/[0.04] hover:bg-white/[0.09] text-white border border-white/[0.1] hover:border-white/[0.18]',
+    ghost: 'bg-transparent hover:bg-white/[0.05] text-gray-300 hover:text-white',
+    danger: 'bg-error/90 hover:bg-error text-white shadow-lg shadow-error/20 border border-rose-400/20',
   };
 
   const sizes = {
@@ -33,7 +35,8 @@ export const Button: React.FC<ButtonProps> = ({
 
   return (
     <motion.button
-      whileTap={{ scale: 0.97 }}
+      whileHover={disabled || loading ? undefined : { y: -1 }}
+      whileTap={disabled || loading ? undefined : { scale: 0.97 }}
       disabled={disabled || loading}
       className={cn(
         'inline-flex items-center justify-center gap-2 font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed',

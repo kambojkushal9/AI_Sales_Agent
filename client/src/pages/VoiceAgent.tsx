@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Mic,
   MicOff,
@@ -11,9 +11,12 @@ import {
   Wrench,
   Sparkles,
   Globe,
+  Activity,
+  ShieldCheck,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { AiOrb, OrbState } from '../components/AiOrb';
+import { EchoPulse } from '../components/EchoPulse';
 import { Card, Badge, Button } from '../components/ui';
 import { agentAPI, callsAPI } from '../lib/api';
 import { formatDuration, getSentimentEmoji } from '../lib/utils';
@@ -252,7 +255,6 @@ export const VoiceAgent: React.FC = () => {
       rec.onend = () => {
         recognitionRef.current = null;
         setInterimText('');
-        // Keep listening continuously during an active call if no result was captured
         if (!gotResult && callActiveRef.current && !mutedRef.current && !sendingRef.current) {
           restartTimerRef.current = window.setTimeout(() => {
             if (callActiveRef.current && !mutedRef.current && !sendingRef.current) {
@@ -281,6 +283,7 @@ export const VoiceAgent: React.FC = () => {
     setCallActive(true);
     callActiveRef.current = true;
     setOrbState('thinking');
+    startWaveform();
 
     try {
       const res = await agentAPI.initVoiceSession(newSid, languageRef.current);
@@ -289,7 +292,6 @@ export const VoiceAgent: React.FC = () => {
       const initialMsgs: Message[] = [{ role: 'agent', content: greeting, timestamp: new Date().toISOString() }];
       setMessages(initialMsgs);
 
-      // Create the call record immediately in the backend
       callsAPI
         .create({
           customerName: 'Live Voice Prospect',
@@ -431,67 +433,103 @@ export const VoiceAgent: React.FC = () => {
 
   const statusLabels: Record<OrbState, string> = {
     idle: callActive ? 'Ready — Speak or Type Below' : 'Ready to Connect',
-    listening: 'Listening to Customer...',
+    listening: 'Listening to Prospect...',
     thinking: 'Gemini Reasoning & Tool Selection...',
     speaking: 'Aria is Speaking...',
-    completed: 'Session Completed',
+    completed: 'Session Saved to CRM',
   };
 
   return (
-    <div className="grid lg:grid-cols-12 gap-6 h-full">
-      {/* Left Panel: AI Orb & Controls (7 cols) */}
-      <Card className="lg:col-span-7 flex flex-col justify-between relative overflow-hidden min-h-[540px]">
-        <div className="flex flex-wrap items-center justify-between gap-3 z-10">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-primary" />
-            <h2 className="font-space font-semibold text-lg">AI Sales Command Center</h2>
+    <div className="grid lg:grid-cols-12 gap-6 max-w-7xl mx-auto">
+      {/* Left Studio Stage: AI Orb & Acoustic Controls (7 cols) */}
+      <Card className="lg:col-span-7 flex flex-col justify-between relative overflow-hidden min-h-[580px] border-primary/20">
+        {/* Subtle studio radial backdrop */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-60"
+          style={{
+            background:
+              'radial-gradient(circle at 50% 45%, rgba(139,92,246,0.12) 0%, rgba(34,211,238,0.04) 45%, transparent 72%)',
+          }}
+        />
+
+        {/* Studio Top Telemetry */}
+        <div className="flex flex-wrap items-center justify-between gap-3 z-10 pb-4 border-b border-white/[0.07]">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-secondary" />
+            </div>
+            <div>
+              <h2 className="font-space font-semibold text-base text-white">AI Voice Studio</h2>
+              <p className="text-[11px] text-gray-400">Aria • Autonomous Sales Representative</p>
+            </div>
           </div>
 
           <div className="flex items-center gap-2">
             {!geminiAvailable && <Badge variant="warning">Demo Mode</Badge>}
             <Badge variant={callActive ? 'success' : 'default'}>
-              {callActive ? `Live • ${formatDuration(duration)}` : 'Standby'}
+              {callActive ? (
+                <span className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  Live • {formatDuration(duration)}
+                </span>
+              ) : (
+                'Standby'
+              )}
             </Badge>
           </div>
         </div>
 
-        {/* Center Orb + Waveform */}
+        {/* Center Orb + EchoPulse + Live Canvas Waveform */}
         <div className="flex-1 flex flex-col items-center justify-center py-6 z-10">
           <AiOrb state={orbState} size="lg" />
 
-          <motion.p
-            key={orbState}
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-6 text-sm font-medium text-secondary tracking-wide"
-          >
-            {statusLabels[orbState]}
-          </motion.p>
+          <div className="mt-5 flex flex-col items-center">
+            <EchoPulse state={orbState} bars={24} height={26} />
+            <motion.p
+              key={orbState}
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-3 text-xs font-semibold uppercase tracking-widest text-secondary"
+            >
+              {statusLabels[orbState]}
+            </motion.p>
+          </div>
 
-          {interimText && (
-            <p className="mt-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-gray-300 max-w-sm truncate">
-              “{interimText}”
-            </p>
-          )}
+          <AnimatePresence>
+            {interimText && (
+              <motion.div
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className="mt-3 px-4 py-1.5 rounded-full glass-subtle text-xs text-gray-200 max-w-sm truncate"
+              >
+                “{interimText}”
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <canvas
             ref={canvasRef}
             width={280}
-            height={40}
-            className="mt-4 rounded-lg opacity-80"
+            height={36}
+            className="mt-3 rounded-lg opacity-80"
           />
         </div>
 
-        {/* Controls Bar */}
-        <div className="flex flex-wrap items-center justify-center gap-3 pt-4 border-t border-white/10 z-10">
+        {/* Studio Control Dock */}
+        <div className="flex flex-wrap items-center justify-center gap-2.5 pt-4 border-t border-white/[0.08] z-10">
           {!callActive ? (
-            <Button onClick={handleStartCall} size="lg" className="bg-emerald-600 hover:bg-emerald-500 from-emerald-600 to-emerald-500">
-              <PhoneCall className="w-5 h-5" />
+            <Button
+              onClick={handleStartCall}
+              size="lg"
+              className="bg-gradient-to-r from-emerald-600 to-teal-500 hover:brightness-110 shadow-lg shadow-emerald-500/25 border border-emerald-400/30"
+            >
+              <PhoneCall className="w-4 h-4" />
               Start AI Call
             </Button>
           ) : (
             <Button onClick={handleEndCall} variant="danger" size="lg">
-              <PhoneOff className="w-5 h-5" />
+              <PhoneOff className="w-4 h-4" />
               End Call
             </Button>
           )}
@@ -529,8 +567,8 @@ export const VoiceAgent: React.FC = () => {
             {ttsEnabled ? 'Voice On' : 'Voice Off'}
           </Button>
 
-          <div className="flex items-center gap-2 bg-bg-secondary border border-white/10 rounded-xl px-3 py-2">
-            <Globe className="w-4 h-4 text-gray-400" />
+          <div className="flex items-center gap-2 bg-bg-secondary/90 border border-white/10 rounded-xl px-3 py-2">
+            <Globe className="w-4 h-4 text-secondary" />
             <select
               value={language}
               onChange={(e) => {
@@ -541,7 +579,8 @@ export const VoiceAgent: React.FC = () => {
                   startListening();
                 }
               }}
-              className="bg-transparent text-sm text-white focus:outline-none"
+              className="bg-transparent text-xs font-medium text-white focus:outline-none"
+              aria-label="Conversation Language"
             >
               <option value="en" className="bg-bg-card">English</option>
               <option value="hi" className="bg-bg-card">Hindi</option>
@@ -551,20 +590,26 @@ export const VoiceAgent: React.FC = () => {
         </div>
       </Card>
 
-      {/* Right Panel: Intelligence & Live Transcript (5 cols) */}
+      {/* Right Panel: AI Sales DNA & Live Transcript (5 cols) */}
       <div className="lg:col-span-5 flex flex-col gap-4">
-        {/* Stage Pipeline */}
+        {/* Call Timeline / Stage Pipeline */}
         <Card className="p-4">
-          <p className="text-xs text-gray-400 mb-2.5 font-medium">Conversation Stage</p>
-          <div className="flex items-center justify-between gap-1">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-medium text-gray-400 flex items-center gap-1.5">
+              <Activity className="w-3.5 h-3.5 text-secondary" />
+              Call Timeline
+            </span>
+            <span className="text-[11px] font-medium text-primary">{stage}</span>
+          </div>
+          <div className="flex items-center justify-between gap-1.5">
             {STAGES.map((st, idx) => {
               const currentIdx = STAGES.indexOf(stage);
               const active = idx <= (currentIdx === -1 ? 0 : currentIdx);
               return (
                 <div key={st} className="flex-1 text-center">
                   <div
-                    className={`h-1.5 rounded-full mb-1.5 transition-all ${
-                      active ? 'bg-gradient-to-r from-primary to-secondary' : 'bg-white/10'
+                    className={`h-1.5 rounded-full mb-1.5 transition-all duration-500 ${
+                      active ? 'bg-gradient-to-r from-primary to-secondary shadow-[0_0_8px_rgba(34,211,238,0.4)]' : 'bg-white/10'
                     }`}
                   />
                   <span className={`text-[10px] ${active ? 'text-white font-medium' : 'text-gray-500'}`}>
@@ -576,80 +621,101 @@ export const VoiceAgent: React.FC = () => {
           </div>
         </Card>
 
-        {/* Live Metrics */}
-        <div className="grid grid-cols-3 gap-3">
-          <Card className="p-3.5 text-center">
-            <p className="text-[11px] text-gray-400">Sentiment</p>
-            <p className="text-lg mt-1">
-              {getSentimentEmoji(sentiment)}{' '}
-              <span className="text-xs capitalize font-medium text-white">{sentiment}</span>
-            </p>
-          </Card>
-          <Card className="p-3.5 text-center">
-            <p className="text-[11px] text-gray-400">Buying Intent</p>
-            <Badge
-              variant={buyingIntent === 'high' ? 'success' : buyingIntent === 'medium' ? 'primary' : 'warning'}
-              className="mt-1.5"
-            >
-              {buyingIntent}
-            </Badge>
-          </Card>
-          <Card className="p-3.5 text-center">
-            <p className="text-[11px] text-gray-400">Lead Score</p>
-            <p className="font-space text-xl font-bold text-secondary mt-0.5">{leadScore}/100</p>
-          </Card>
-        </div>
+        {/* AI Sales DNA Panel */}
+        <Card className="p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-gray-400 flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-primary" />
+              AI Sales DNA
+            </span>
+            <span className="text-[11px] text-gray-400">Qualification {qualProgress}%</span>
+          </div>
+          <div className="grid grid-cols-3 gap-2.5">
+            <div className="p-3 rounded-xl bg-white/[0.025] border border-white/[0.06] text-center">
+              <p className="text-[10px] uppercase tracking-wider text-gray-400">Sentiment</p>
+              <p className="text-sm mt-1 font-medium text-white capitalize">
+                {getSentimentEmoji(sentiment)} {sentiment}
+              </p>
+            </div>
+            <div className="p-3 rounded-xl bg-white/[0.025] border border-white/[0.06] text-center">
+              <p className="text-[10px] uppercase tracking-wider text-gray-400">Intent</p>
+              <Badge
+                variant={buyingIntent === 'high' ? 'success' : buyingIntent === 'medium' ? 'primary' : 'warning'}
+                className="mt-1"
+              >
+                {buyingIntent}
+              </Badge>
+            </div>
+            <div className="p-3 rounded-xl bg-white/[0.025] border border-white/[0.06] text-center">
+              <p className="text-[10px] uppercase tracking-wider text-gray-400">Lead Score</p>
+              <p className="font-space text-lg font-bold text-secondary mt-0.5 tabular-nums">{leadScore}/100</p>
+            </div>
+          </div>
+        </Card>
 
         {/* Tools Invoked */}
-        {toolsInvoked.length > 0 && (
-          <Card className="p-3.5">
-            <div className="flex items-center gap-1.5 text-xs text-gray-400 mb-2">
-              <Wrench className="w-3.5 h-3.5 text-secondary" />
-              Autonomous Tools Executed
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {toolsInvoked.map((t) => (
-                <Badge key={t} variant="secondary">
-                  {t}
-                </Badge>
-              ))}
-            </div>
-          </Card>
-        )}
+        <AnimatePresence>
+          {toolsInvoked.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+            >
+              <Card className="p-3.5">
+                <div className="flex items-center gap-1.5 text-xs text-gray-400 mb-2">
+                  <Wrench className="w-3.5 h-3.5 text-secondary" />
+                  Autonomous Tools Executed
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {toolsInvoked.map((t) => (
+                    <Badge key={t} variant="secondary">
+                      {t}
+                    </Badge>
+                  ))}
+                </div>
+              </Card>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Live Transcript + Text Input */}
-        <Card className="flex-1 flex flex-col min-h-[300px] max-h-[420px]">
-          <div className="flex items-center justify-between pb-3 border-b border-white/10">
-            <h3 className="text-sm font-space font-semibold">Live Transcript</h3>
-            <span className="text-xs text-gray-400">Qualification: {qualProgress}%</span>
+        <Card className="flex-1 flex flex-col min-h-[300px] max-h-[400px]">
+          <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
+            <h3 className="text-sm font-space font-semibold text-white">Live Transcript</h3>
+            <span className="text-[11px] text-gray-400">{messages.length} turns</span>
           </div>
 
           <div className="flex-1 overflow-y-auto py-3 space-y-3 pr-1">
             {messages.length === 0 && (
-              <p className="text-xs text-gray-500 text-center py-10">
-                Click “Start AI Call” or type a message below to begin a live sales conversation.
-              </p>
+              <div className="text-center py-10 px-4">
+                <p className="text-xs text-gray-400">
+                  Click <span className="text-emerald-400 font-medium">Start AI Call</span> or type a message below to begin a live voice sales session.
+                </p>
+              </div>
             )}
             {messages.map((m, idx) => (
-              <div
+              <motion.div
                 key={idx}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2 }}
                 className={`flex flex-col ${m.role === 'agent' ? 'items-end' : 'items-start'}`}
               >
                 <div
-                  className={`max-w-[88%] rounded-2xl px-3.5 py-2.5 text-sm ${
+                  className={`max-w-[88%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
                     m.role === 'agent'
-                      ? 'bg-primary/20 border border-primary/30 text-white'
-                      : 'bg-white/[0.06] border border-white/10 text-gray-200'
+                      ? 'bg-primary/15 border border-primary/30 text-white'
+                      : 'bg-white/[0.05] border border-white/[0.08] text-gray-200'
                   }`}
                 >
                   <p>{m.content}</p>
                   {m.sources && m.sources.length > 0 && (
-                    <p className="text-[10px] text-cyan-300/80 mt-1.5">
+                    <p className="text-[10px] text-cyan-300/85 mt-1.5 pt-1 border-t border-white/[0.06]">
                       Sources: {m.sources.map((s) => s.title).join(', ')}
                     </p>
                   )}
                 </div>
-              </div>
+              </motion.div>
             ))}
             <div ref={transcriptEndRef} />
           </div>
@@ -659,16 +725,16 @@ export const VoiceAgent: React.FC = () => {
               e.preventDefault();
               handleSendMessage();
             }}
-            className="pt-3 border-t border-white/10 flex gap-2"
+            className="pt-3 border-t border-white/[0.08] flex gap-2"
           >
             <input
               type="text"
               value={textInput}
               onChange={(e) => setTextInput(e.target.value)}
               placeholder="Type a customer message (or speak)..."
-              className="flex-1 bg-bg-secondary border border-white/10 rounded-xl px-3.5 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary/60"
+              className="flex-1 bg-bg-secondary border border-white/10 rounded-xl px-3.5 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-secondary/60"
             />
-            <Button type="submit" loading={sending} size="md">
+            <Button type="submit" loading={sending} size="md" aria-label="Send message">
               <Send className="w-4 h-4" />
             </Button>
           </form>

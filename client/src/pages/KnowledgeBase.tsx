@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Upload, FileText, Search, Trash2, Plus, Sparkles } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Upload, FileText, Search, Trash2, Plus, Sparkles, BookOpen } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { Card, Button, Badge, Input, Modal } from '../components/ui';
+import { Card, Button, Badge, Input, Modal, EmptyState } from '../components/ui';
 import { knowledgeAPI } from '../lib/api';
 import { demoKnowledgeDocs } from '../lib/demoData';
 import { KnowledgeDocument } from '../types';
@@ -94,10 +95,10 @@ export const KnowledgeBase: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-7xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="font-space text-2xl font-bold">RAG Knowledge Base</h2>
+          <h2 className="font-space text-2xl font-bold tracking-tight">RAG Knowledge Base</h2>
           <p className="text-sm text-gray-400">
             Upload company documents so the AI agent answers with verified citations.
           </p>
@@ -131,55 +132,78 @@ export const KnowledgeBase: React.FC = () => {
           </Button>
         </form>
 
-        {ragResults.length > 0 && (
-          <div className="mt-4 space-y-2.5 pt-4 border-t border-white/10">
-            <p className="text-xs font-medium text-secondary">Retrieved Context Chunks:</p>
-            {ragResults.map((r, i) => (
-              <div key={i} className="p-3 rounded-xl bg-white/[0.03] border border-white/10 text-sm">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="font-medium text-white">{r.title}</span>
-                  <Badge variant="secondary">Relevance: {Math.round(r.score * 100)}%</Badge>
-                </div>
-                <p className="text-gray-300 text-xs leading-relaxed">{r.content}</p>
-              </div>
-            ))}
-          </div>
-        )}
+        <AnimatePresence>
+          {ragResults.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="mt-4 space-y-2.5 pt-4 border-t border-white/[0.08]"
+            >
+              <p className="text-xs font-medium text-secondary">Retrieved Context Chunks:</p>
+              {ragResults.map((r, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: -6 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                  className="p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.08] text-sm"
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-medium text-white">{r.title}</span>
+                    <Badge variant="secondary">Relevance: {Math.round(r.score * 100)}%</Badge>
+                  </div>
+                  <p className="text-gray-300 text-xs leading-relaxed">{r.content}</p>
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </Card>
 
       {/* Documents Grid */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {docs.map((doc) => (
-          <Card key={doc._id} hover className="flex flex-col justify-between">
-            <div>
-              <div className="flex items-start justify-between gap-2 mb-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center text-primary">
-                  <FileText className="w-5 h-5" />
+      {docs.length === 0 ? (
+        <EmptyState
+          icon={BookOpen}
+          title="No knowledge documents yet"
+          description="Upload PDFs, Markdown files, or create a text entry to ground your AI sales agent."
+          action={<Button onClick={() => setUploadOpen(true)}>Upload Document</Button>}
+        />
+      ) : (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {docs.map((doc) => (
+            <Card key={doc._id} hover className="flex flex-col justify-between">
+              <div>
+                <div className="flex items-start justify-between gap-2 mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center text-primary">
+                    <FileText className="w-5 h-5" />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="primary">{doc.type.toUpperCase()}</Badge>
+                    <button
+                      onClick={() => handleDelete(doc._id)}
+                      className="p-1.5 rounded-lg text-gray-400 hover:text-error hover:bg-error/10 transition-colors"
+                      aria-label="Delete document"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant="primary">{doc.type.toUpperCase()}</Badge>
-                  <button
-                    onClick={() => handleDelete(doc._id)}
-                    className="p-1.5 rounded-lg text-gray-400 hover:text-error hover:bg-error/10"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
+                <h3 className="font-space font-semibold text-base mb-1">{doc.title}</h3>
+                <p className="text-xs text-gray-400">
+                  {doc.chunkCount} embedded chunks • Added {formatDate(doc.createdAt)}
+                </p>
               </div>
-              <h3 className="font-space font-semibold text-base mb-1">{doc.title}</h3>
-              <p className="text-xs text-gray-400">
-                {doc.chunkCount} embedded chunks • Added {formatDate(doc.createdAt)}
-              </p>
-            </div>
-            <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between">
-              <Badge variant={doc.status === 'ready' ? 'success' : 'warning'}>{doc.status}</Badge>
-              <span className="text-xs text-gray-500">
-                {doc.fileSize ? `${Math.round(doc.fileSize / 1024)} KB` : 'Text'}
-              </span>
-            </div>
-          </Card>
-        ))}
-      </div>
+              <div className="mt-4 pt-3 border-t border-white/[0.08] flex items-center justify-between">
+                <Badge variant={doc.status === 'ready' ? 'success' : 'warning'}>{doc.status}</Badge>
+                <span className="text-xs text-gray-500">
+                  {doc.fileSize ? `${Math.round(doc.fileSize / 1024)} KB` : 'Text'}
+                </span>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
 
       {/* Upload Modal */}
       <Modal isOpen={uploadOpen} onClose={() => setUploadOpen(false)} title="Upload Knowledge Document">

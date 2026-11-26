@@ -44,20 +44,20 @@ export const Analytics: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-7xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="font-space text-2xl font-bold">Analytics & AI Insights</h2>
+          <h2 className="font-space text-2xl font-bold tracking-tight">Analytics & AI Insights</h2>
           <p className="text-sm text-gray-400">Real-time sales intelligence powered by Google Gemini.</p>
         </div>
 
-        <div className="flex items-center gap-2 bg-bg-secondary border border-white/10 rounded-xl p-1">
+        <div className="flex items-center gap-1.5 bg-bg-secondary border border-white/10 rounded-xl p-1">
           {(['7d', '30d', '90d'] as const).map((r) => (
             <button
               key={r}
               onClick={() => setRange(r)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                range === r ? 'bg-primary text-white' : 'text-gray-400 hover:text-white'
+                range === r ? 'bg-primary text-white shadow-sm' : 'text-gray-400 hover:text-white'
               }`}
             >
               Last {r}
@@ -68,25 +68,25 @@ export const Analytics: React.FC = () => {
 
       {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="p-4">
+        <Card hover className="p-4">
           <p className="text-xs text-gray-400">Qualified Rate</p>
           <p className="font-space text-2xl font-bold text-emerald-400 mt-1">
             <AnimatedCounter value={48.1} decimals={1} suffix="%" />
           </p>
         </Card>
-        <Card className="p-4">
+        <Card hover className="p-4">
           <p className="text-xs text-gray-400">Booking Rate</p>
           <p className="font-space text-2xl font-bold text-secondary mt-1">
             <AnimatedCounter value={27.5} decimals={1} suffix="%" />
           </p>
         </Card>
-        <Card className="p-4">
+        <Card hover className="p-4">
           <p className="text-xs text-gray-400">Positive Sentiment</p>
           <p className="font-space text-2xl font-bold text-primary mt-1">
             <AnimatedCounter value={58} suffix="%" />
           </p>
         </Card>
-        <Card className="p-4">
+        <Card hover className="p-4">
           <p className="text-xs text-gray-400">Pipeline Value</p>
           <p className="font-space text-2xl font-bold text-amber-400 mt-1">
             <AnimatedCounter value={42.5} prefix="₹" suffix="L" decimals={1} />
@@ -109,8 +109,8 @@ export const Analytics: React.FC = () => {
                 </defs>
                 <XAxis dataKey="date" stroke="#6B7280" fontSize={12} tickLine={false} axisLine={false} />
                 <YAxis stroke="#6B7280" fontSize={12} tickLine={false} axisLine={false} />
-                <Tooltip contentStyle={{ backgroundColor: '#141827', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }} />
-                <Area type="monotone" dataKey="calls" stroke="#8B5CF6" strokeWidth={2} fill="url(#analyticsArea)" />
+                <Tooltip contentStyle={{ backgroundColor: '#0B0F1A', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }} />
+                <Area type="monotone" dataKey="calls" stroke="#8B5CF6" strokeWidth={2.5} fill="url(#analyticsArea)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -135,7 +135,7 @@ export const Analytics: React.FC = () => {
                     <Cell key={idx} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip contentStyle={{ backgroundColor: '#141827', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }} />
+                <Tooltip contentStyle={{ backgroundColor: '#0B0F1A', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }} />
               </PieChart>
             </ResponsiveContainer>
             <div className="space-y-2 pr-4">
@@ -158,7 +158,7 @@ export const Analytics: React.FC = () => {
             <BarChart data={demoConversionFunnel}>
               <XAxis dataKey="stage" stroke="#9CA3AF" fontSize={12} tickLine={false} axisLine={false} />
               <YAxis stroke="#6B7280" fontSize={12} tickLine={false} axisLine={false} />
-              <Tooltip contentStyle={{ backgroundColor: '#141827', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }} />
+              <Tooltip contentStyle={{ backgroundColor: '#0B0F1A', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }} />
               <Bar dataKey="count" fill="#22D3EE" radius={[8, 8, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>

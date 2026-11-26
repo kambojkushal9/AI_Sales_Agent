@@ -7,7 +7,7 @@ import { agentAPI } from '../lib/api';
 export const Settings: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [geminiAvailable, setGeminiAvailable] = useState(true);
-  const [modelName, setModelName] = useState('gemini-2.0-flash');
+  const [modelName, setModelName] = useState('gemini-3.5-flash-lite');
   const [form, setForm] = useState({
     agentName: 'Aria (EchoSales AI)',
     companyName: 'EchoSales AI',
@@ -53,7 +53,7 @@ export const Settings: React.FC = () => {
   return (
     <div className="max-w-4xl space-y-6">
       <div>
-        <h2 className="font-space text-2xl font-bold">Agent & Platform Settings</h2>
+        <h2 className="font-space text-2xl font-bold tracking-tight">Agent & Platform Settings</h2>
         <p className="text-sm text-gray-400">Configure your autonomous sales persona, pitch, and Gemini integration.</p>
       </div>
 
@@ -96,7 +96,7 @@ export const Settings: React.FC = () => {
               rows={2}
               value={form.companyDescription}
               onChange={(e) => setForm({ ...form, companyDescription: e.target.value })}
-              className="w-full bg-bg-secondary border border-white/10 rounded-xl p-3 text-sm text-white"
+              className="w-full bg-bg-secondary border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-secondary/60"
             />
           </div>
 
@@ -106,7 +106,7 @@ export const Settings: React.FC = () => {
               rows={2}
               value={form.salesPitch}
               onChange={(e) => setForm({ ...form, salesPitch: e.target.value })}
-              className="w-full bg-bg-secondary border border-white/10 rounded-xl p-3 text-sm text-white"
+              className="w-full bg-bg-secondary border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-secondary/60"
             />
           </div>
 
@@ -116,7 +116,7 @@ export const Settings: React.FC = () => {
               rows={2}
               value={form.greeting}
               onChange={(e) => setForm({ ...form, greeting: e.target.value })}
-              className="w-full bg-bg-secondary border border-white/10 rounded-xl p-3 text-sm text-white"
+              className="w-full bg-bg-secondary border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-secondary/60"
             />
           </div>
 
